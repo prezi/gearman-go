@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 // One client connect to one server.
@@ -178,7 +179,13 @@ func (client *Client) do(funcname string, data []byte,
 	id := IdGen.Id()
 	req := getJob(id, []byte(funcname), data)
 	req.DataType = flag
-	client.write(req)
+	client.conn.SetWriteDeadline(time.Now().Add(1*time.Second))
+	// client.write(req)
+	if err = client.write(req); err != nil {
+		delete(client.innerHandler, "c")
+		client.lastcall = ""
+		return
+	}
 	mutex.Lock()
 	return
 }
