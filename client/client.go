@@ -202,14 +202,14 @@ func (client *Client) do(funcname string, data []byte,
 	}
 	var success = make(chan int, 0)
 	var timer = time.After(5 * time.Second)
-	go func() { mutex.Lock() ; success <- 1 }()
+	go func() { mutex.Lock(); success <- 1 }()
 	select {
-		case <- success:
-		  return
-		case <- timer:
-		  delete(client.innerHandler, "c")
-		  client.lastcall = ""
-		  return "", ErrLostConn
+	case <-success:
+		return
+	case <-timer:
+		delete(client.innerHandler, "c")
+		client.lastcall = ""
+		return "", ErrLostConn
 	}
 	return
 }
