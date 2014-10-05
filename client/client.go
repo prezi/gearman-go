@@ -200,7 +200,7 @@ func (client *Client) do(funcname string, data []byte,
 		client.lastcall = ""
 		return
 	}
-	var success chan int
+	var success = make(chan int, 0)
 	var timer = time.After(5 * time.Second)
 	go func() { mutex.Lock() ; success <- 1 }()
 	select {
