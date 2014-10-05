@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"net"
 	"sync"
+	"time"
 )
 
 // One client connect to one server.
@@ -199,7 +200,17 @@ func (client *Client) do(funcname string, data []byte,
 		client.lastcall = ""
 		return
 	}
-	mutex.Lock()
+	var success chan int
+	var timer = time.After(5 * time.Second)
+	go func() { mutex.Lock() ; success <- 1 }()
+	select {
+		case <- success:
+		  return
+		case <- timer:
+		  delete(client.innerHandler, "c")
+		  client.lastcall = ""
+		  return "", ErrLostConn
+	}
 	return
 }
 
